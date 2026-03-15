@@ -76,13 +76,7 @@ def _dt_to_str(dt: Any) -> str | None:
 
 
 # ── MCP Server ───────────────────────────────────────────────────────────────
-mcp = FastMCP(
-    "JuventusSchulen",
-    description=(
-        "Zugriff auf die Juventus-Schul-Plattform: "
-        "WebDAV-Dateisystem, Schulkalender (iCal) und News-Feed (RSS)."
-    ),
-)
+mcp = FastMCP("JuventusSchulen")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
