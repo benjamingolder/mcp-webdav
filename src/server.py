@@ -518,6 +518,11 @@ def get_feed_info() -> dict[str, Any]:
 
 if __name__ == "__main__":
     import sys
+    import uvicorn
+    from starlette.applications import Starlette
+    from starlette.routing import Mount
+    from starlette.middleware import Middleware
+    from oauth import OAUTH_ROUTES, BearerAuthMiddleware
 
     transport = os.getenv("MCP_TRANSPORT", "sse")
 
@@ -525,4 +530,11 @@ if __name__ == "__main__":
         mcp.run(transport="stdio")
     else:
         print(f"JuventusSchulen MCP Server läuft auf http://{_host}:{_port}/sse", file=sys.stderr)
-        mcp.run(transport="sse")
+
+        mcp_app = mcp.sse_app()
+
+        app = Starlette(
+            routes=OAUTH_ROUTES + [Mount("/", app=mcp_app)],
+            middleware=[Middleware(BearerAuthMiddleware)],
+        )
+        uvicorn.run(app, host=_host, port=_port)
