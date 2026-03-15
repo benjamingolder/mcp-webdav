@@ -529,9 +529,15 @@ if __name__ == "__main__":
     if transport == "stdio":
         mcp.run(transport="stdio")
     else:
-        print(f"JuventusSchulen MCP Server läuft auf http://{_host}:{_port}/sse", file=sys.stderr)
+        # Streamable HTTP (Claude.ai Browser) bevorzugen, SSE als Fallback
+        try:
+            mcp_app = mcp.streamable_http_app()
+            endpoint = f"http://{_host}:{_port}/mcp"
+        except AttributeError:
+            mcp_app = mcp.sse_app()
+            endpoint = f"http://{_host}:{_port}/sse"
 
-        mcp_app = mcp.sse_app()
+        print(f"JuventusSchulen MCP Server läuft auf {endpoint}", file=sys.stderr)
 
         app = Starlette(
             routes=OAUTH_ROUTES + [Mount("/", app=mcp_app)],
