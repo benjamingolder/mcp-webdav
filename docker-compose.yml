@@ -1,0 +1,24 @@
+services:
+  juventusschulen-mcp:
+    build: .
+    container_name: juventusschulen-mcp
+    restart: unless-stopped
+    ports:
+      - "${MCP_PORT:-8000}:${MCP_PORT:-8000}"
+    environment:
+      # WebDAV
+      WEBDAV_URL: ${WEBDAV_URL:-https://lernen.juvecampus.ch/webdav}
+      WEBDAV_LOGIN: ${WEBDAV_LOGIN}
+      WEBDAV_PASSWORD: ${WEBDAV_PASSWORD}
+      WEBDAV_ROOT: ${WEBDAV_ROOT:-/}
+      # Kalender (iCal)
+      ICAL_URL: ${ICAL_URL:-https://lernen.juvecampus.ch/ical/paggregated/194118210/QZhclI.ics}
+      # News (RSS)
+      RSS_URL: ${RSS_URL:-https://lernen.juvecampus.ch/rss/personal/u194805814/KHbf96jk/olat.rss}
+      # MCP Server
+      MCP_TRANSPORT: sse
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: ${MCP_PORT:-8000}
+      MAX_TEXT_SIZE_BYTES: ${MAX_TEXT_SIZE_BYTES:-5242880}
+    env_file:
+      - .env
