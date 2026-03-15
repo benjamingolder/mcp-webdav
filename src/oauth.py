@@ -67,6 +67,14 @@ def _login_page(error: bool = False) -> str:
 
 # ── OAuth Endpoints ────────────────────────────────────────────────────────────
 
+async def oauth_protected_resource(request: Request) -> JSONResponse:
+    base = _base_url(request)
+    return JSONResponse({
+        "resource": base,
+        "authorization_servers": [base],
+    })
+
+
 async def oauth_metadata(request: Request) -> JSONResponse:
     base = _base_url(request)
     return JSONResponse({
@@ -142,6 +150,7 @@ async def token(request: Request) -> JSONResponse:
 # ── Bearer Token Middleware ────────────────────────────────────────────────────
 
 _OPEN_PATHS = {
+    "/.well-known/oauth-protected-resource",
     "/.well-known/oauth-authorization-server",
     "/authorize",
     "/token",
@@ -171,6 +180,7 @@ class BearerAuthMiddleware(BaseHTTPMiddleware):
 
 
 OAUTH_ROUTES = [
+    Route("/.well-known/oauth-protected-resource", oauth_protected_resource, methods=["GET"]),
     Route("/.well-known/oauth-authorization-server", oauth_metadata, methods=["GET"]),
     Route("/authorize", authorize, methods=["GET", "POST"]),
     Route("/token",     token,     methods=["POST"]),
