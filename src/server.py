@@ -516,6 +516,7 @@ def get_feed_info() -> dict[str, Any]:
 
 if __name__ == "__main__":
     import sys
+    import uvicorn
 
     transport = os.getenv("MCP_TRANSPORT", "sse")
     host      = os.getenv("MCP_HOST", "0.0.0.0")
@@ -525,4 +526,4 @@ if __name__ == "__main__":
         mcp.run(transport="stdio")
     else:
         print(f"JuventusSchulen MCP Server läuft auf http://{host}:{port}/sse", file=sys.stderr)
-        mcp.run(transport="sse", host=host, port=port)
+        uvicorn.run(mcp.get_asgi_app(), host=host, port=port)
