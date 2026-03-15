@@ -529,18 +529,27 @@ if __name__ == "__main__":
     if transport == "stdio":
         mcp.run(transport="stdio")
     else:
+        import contextlib
+
         # Streamable HTTP (Claude.ai Browser) bevorzugen, SSE als Fallback
         try:
-            mcp_app = mcp.streamable_http_app()
-            endpoint = f"http://{_host}:{_port}/mcp"
+            mcp_inner = mcp.streamable_http_app()
+            endpoint  = f"http://{_host}:{_port}/mcp"
         except AttributeError:
-            mcp_app = mcp.sse_app()
-            endpoint = f"http://{_host}:{_port}/sse"
+            mcp_inner = mcp.sse_app()
+            endpoint  = f"http://{_host}:{_port}/sse"
 
         print(f"JuventusSchulen MCP Server läuft auf {endpoint}", file=sys.stderr)
 
+        # Lifespan des FastMCP-Apps (Task Group / Session Manager) weiterleiten
+        @contextlib.asynccontextmanager
+        async def lifespan(app):
+            async with mcp_inner.router.lifespan_context(mcp_inner):
+                yield
+
         app = Starlette(
-            routes=OAUTH_ROUTES + [Mount("/", app=mcp_app)],
+            lifespan=lifespan,
+            routes=OAUTH_ROUTES + [Mount("/", app=mcp_inner)],
             middleware=[Middleware(BearerAuthMiddleware)],
         )
         uvicorn.run(app, host=_host, port=_port)
