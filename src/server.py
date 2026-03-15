@@ -76,7 +76,9 @@ def _dt_to_str(dt: Any) -> str | None:
 
 
 # ── MCP Server ───────────────────────────────────────────────────────────────
-mcp = FastMCP("JuventusSchulen")
+_host = os.getenv("MCP_HOST", "0.0.0.0")
+_port = int(os.getenv("MCP_PORT", "8000"))
+mcp = FastMCP("JuventusSchulen", host=_host, port=_port)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -516,14 +518,11 @@ def get_feed_info() -> dict[str, Any]:
 
 if __name__ == "__main__":
     import sys
-    import uvicorn
 
     transport = os.getenv("MCP_TRANSPORT", "sse")
-    host      = os.getenv("MCP_HOST", "0.0.0.0")
-    port      = int(os.getenv("MCP_PORT", "8000"))
 
     if transport == "stdio":
         mcp.run(transport="stdio")
     else:
-        print(f"JuventusSchulen MCP Server läuft auf http://{host}:{port}/sse", file=sys.stderr)
-        uvicorn.run(mcp.get_asgi_app(), host=host, port=port)
+        print(f"JuventusSchulen MCP Server läuft auf http://{_host}:{_port}/sse", file=sys.stderr)
+        mcp.run(transport="sse")
