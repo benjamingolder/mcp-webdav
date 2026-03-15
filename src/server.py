@@ -8,6 +8,7 @@ from typing import Any
 
 import httpx
 import feedparser
+import requests
 import webdav3.client as wc
 from icalendar import Calendar, Event
 from dateutil.rrule import rruleset, rrulestr
@@ -37,12 +38,17 @@ MAX_TEXT_SIZE = int(os.getenv("MAX_TEXT_SIZE_BYTES", str(5 * 1024 * 1024)))  # 5
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 def _webdav_client() -> wc.Client:
-    return wc.Client({
+    # OpenOLAT verlangt Digest Auth statt Basic Auth
+    session = requests.Session()
+    session.auth = requests.auth.HTTPDigestAuth(WEBDAV_LOGIN, WEBDAV_PASSWORD)
+    client = wc.Client({
         "webdav_hostname": WEBDAV_URL,
         "webdav_login":    WEBDAV_LOGIN,
         "webdav_password": WEBDAV_PASSWORD,
         "webdav_root":     WEBDAV_ROOT,
     })
+    client.session = session
+    return client
 
 
 def _is_text(mime: str | None) -> bool:
