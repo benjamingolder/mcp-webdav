@@ -21,7 +21,8 @@ _valid_tokens: set[str] = set()
 
 def _base_url(request: Request) -> str:
     proto = request.headers.get("x-forwarded-proto", request.url.scheme)
-    host  = request.headers.get("x-forwarded-host", request.url.netloc)
+    # Cloudflare setzt "host" auf den originalen Hostnamen (z.B. juventus.golders.ch)
+    host  = request.headers.get("host", request.url.netloc)
     return f"{proto}://{host}"
 
 
